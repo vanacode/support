@@ -1,0 +1,24 @@
+{
+	"name": "vanacode/support",
+	"description": "Additions for laravel support",
+	"keywords": ["laravel", "vanacode", "support"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Davit Zeynalyan",
+			"email": "davitzeynalyan1991@gmail.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"laravel/framework": "10.*"
+	},
+	"suggest": {
+		"vanacode/helpers": "Useful functions"
+	},
+	"autoload": {
+		"psr-4": {
+			"Vanacode\\Support\\": "src/"
+		}
+	}
+}
