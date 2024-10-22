@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Exception;
 
-trait DynamicClassTrait
+trait DynamicClassPropertyTrait
 {
     use ClassDetailsTrait;
 
