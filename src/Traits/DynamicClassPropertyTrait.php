@@ -4,16 +4,17 @@ namespace Vanacode\Support\Traits;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
-use Exception;
+use Vanacode\Support\Exceptions\DynamicClassPropertyException;
 
 trait DynamicClassPropertyTrait
 {
     use ClassDetailsTrait;
 
+
     /**
      * Make property instance dynamically
      *
-     * @throws Exception
+     * @throws DynamicClassPropertyException
      */
     private function makePropertyInstance(string $property, string $class, string $relativeNamespace, string $suffix, array $data = []): object|null
     {
@@ -22,7 +23,7 @@ trait DynamicClassPropertyTrait
             return null;
         }
         if ($className != $class && !is_subclass_of($className, $class)) {
-            throw new Exception(sprintf('Detected property %s is not subclass of %s', $className, $class));
+            throw new DynamicClassPropertyException(sprintf('Detected property %s is not subclass of %s', $className, $class));
         }
         return App::make($className);
     }
@@ -33,7 +34,7 @@ trait DynamicClassPropertyTrait
      *  first check has {property}Class property
      *  dynamically get based $classRoot and inject it
      *
-     * @throws Exception
+     * @throws DynamicClassPropertyException
      */
     private function getPropertyClassName(string $property, string $relativeNamespace, string $suffix, array $data): ?string
     {
@@ -68,7 +69,7 @@ trait DynamicClassPropertyTrait
         }
 
         if (!isset($data['nullable'])) {
-            throw new \Exception('Unable to detect class for property: ' . $property);
+            throw new DynamicClassPropertyException('Unable to detect class for property: ' . $property);
         }
 
         return null;
