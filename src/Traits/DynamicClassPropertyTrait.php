@@ -16,16 +16,27 @@ trait DynamicClassPropertyTrait
      *
      * @throws DynamicClassPropertyException
      */
-    private function makePropertyInstance(string $property, string $class, string $relativeNamespace, string $suffix, array $data = []): object|null
+    private function makePropertyInstance(string $property, string $class, string $relativeNamespace, string $suffix, array $data = []): ?object
+    {
+        $className = $this->getPropertyClassNameAndCheckDepenedency($property, $class, $relativeNamespace, $suffix, $data);
+        return $className ? App::make($className) : null;
+    }
+
+    private function getPropertyClassNameAndCheckDepenedency(string $property, string $class, string $relativeNamespace, string $suffix, array $data = []): ?string
     {
         $className = $this->getPropertyClassName($property, $relativeNamespace, $suffix, $data);
-        if (isset($data['nullable']) && empty($className)) {
-            return null;
+        if (empty($className)) {
+            if (isset($data['nullable'])) {
+                return null;
+            }
+            throw new DynamicClassPropertyException('Unable to detect class for property: ' . $property);
         }
+
         if ($className != $class && !is_subclass_of($className, $class)) {
             throw new DynamicClassPropertyException(sprintf('Detected property %s is not subclass of %s', $className, $class));
         }
-        return App::make($className);
+
+        return $className;
     }
 
     /**
@@ -66,10 +77,6 @@ trait DynamicClassPropertyTrait
 
         if (isset($data['default'])) {
             return $data['default'];
-        }
-
-        if (!isset($data['nullable'])) {
-            throw new DynamicClassPropertyException('Unable to detect class for property: ' . $property);
         }
 
         return null;
