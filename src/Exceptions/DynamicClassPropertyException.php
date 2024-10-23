@@ -4,6 +4,4 @@ namespace Vanacode\Support\Exceptions;
 
 use Exception;
 
-class DynamicClassPropertyException extends Exception
-{
-}
+class DynamicClassPropertyException extends Exception {}

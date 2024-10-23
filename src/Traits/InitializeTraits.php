@@ -4,7 +4,7 @@ namespace Vanacode\Support\Traits;
 
 trait InitializeTraits
 {
-    public function initializeTraits():void
+    public function initializeTraits(): void
     {
         $class = static::class;
         foreach (class_uses_recursive($class) as $trait) {

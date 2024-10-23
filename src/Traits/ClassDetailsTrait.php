@@ -14,7 +14,7 @@ trait ClassDetailsTrait
 
     private function getClassRelativePaths(): array
     {
-        if (!isset($this->classRelativePaths)) {
+        if (! isset($this->classRelativePaths)) {
             $this->processClassDetails();
         }
 
@@ -24,18 +24,20 @@ trait ClassDetailsTrait
     private function getClassRootFolder(): string
     {
         $path = Str::beforeLast(self::class, '\\');
+
         return Str::afterLast($path, '\\');
     }
 
     private function getRelativeNamespace(string $relativeNamespace): string
     {
-        $rootNamespace = $this->getRootNamespace() . '\\';
-        return $relativeNamespace ? $rootNamespace . $relativeNamespace . '\\' : $rootNamespace;
+        $rootNamespace = $this->getRootNamespace().'\\';
+
+        return $relativeNamespace ? $rootNamespace.$relativeNamespace.'\\' : $rootNamespace;
     }
 
     private function getRootNamespace(): string
     {
-        if (!isset($this->classRootNamespace)) {
+        if (! isset($this->classRootNamespace)) {
             $this->processClassDetails();
         }
 
@@ -44,7 +46,7 @@ trait ClassDetailsTrait
 
     private function getClassWithoutSuffix(): string
     {
-        if (!isset($this->classWithoutSuffix)) {
+        if (! isset($this->classWithoutSuffix)) {
             $this->processClassDetails();
         }
 
@@ -62,5 +64,4 @@ trait ClassDetailsTrait
         $this->classRelativePaths = $classRelativePaths;
         $this->classRootNamespace = Str::before(static::class, '\\');
     }
-
 }

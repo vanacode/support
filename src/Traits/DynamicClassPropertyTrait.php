@@ -3,13 +3,11 @@
 namespace Vanacode\Support\Traits;
 
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 use Vanacode\Support\Exceptions\DynamicClassPropertyException;
 
 trait DynamicClassPropertyTrait
 {
     use ClassDetailsTrait;
-
 
     /**
      * Make property instance dynamically
@@ -19,6 +17,7 @@ trait DynamicClassPropertyTrait
     private function makePropertyInstance(string $property, string $class, string $relativeNamespace, string $suffix, array $data = []): ?object
     {
         $className = $this->getPropertyClassNameAndCheckDepenedency($property, $class, $relativeNamespace, $suffix, $data);
+
         return $className ? App::make($className) : null;
     }
 
@@ -29,10 +28,10 @@ trait DynamicClassPropertyTrait
             if (isset($data['nullable'])) {
                 return null;
             }
-            throw new DynamicClassPropertyException('Unable to detect class for property: ' . $property);
+            throw new DynamicClassPropertyException('Unable to detect class for property: '.$property);
         }
 
-        if ($className != $class && !is_subclass_of($className, $class)) {
+        if ($className != $class && ! is_subclass_of($className, $class)) {
             throw new DynamicClassPropertyException(sprintf('Detected property %s is not subclass of %s', $className, $class));
         }
 
@@ -49,7 +48,7 @@ trait DynamicClassPropertyTrait
      */
     private function getPropertyClassName(string $property, string $relativeNamespace, string $suffix, array $data): ?string
     {
-        $classPropertyName = $property . 'Class';
+        $classPropertyName = $property.'Class';
 
         if (isset($this->{$classPropertyName})) {
             return $this->{$classPropertyName};
@@ -58,10 +57,10 @@ trait DynamicClassPropertyTrait
         $relativeNamespace = $this->getRelativeNamespace($relativeNamespace);
         $parts = $this->getClassRelativePaths();
         $classPrefix = $this->getClassWithoutSuffix();
-        $classBasename = $classPrefix . $suffix;
+        $classBasename = $classPrefix.$suffix;
 
         while ($parts) {
-            $className = $relativeNamespace . implode('\\', $parts) . '\\' . $classBasename;
+            $className = $relativeNamespace.implode('\\', $parts).'\\'.$classBasename;
 
             if (class_exists($className)) {
                 return $className;
@@ -69,7 +68,7 @@ trait DynamicClassPropertyTrait
             array_pop($parts);
         }
 
-        $className = $relativeNamespace . $classBasename;
+        $className = $relativeNamespace.$classBasename;
 
         if (class_exists($className)) {
             return $className;
