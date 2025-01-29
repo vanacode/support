@@ -9,7 +9,7 @@ trait InitializeTraits
         $class = static::class;
         foreach (class_uses_recursive($class) as $trait) {
             if (method_exists($class, $method = 'initialize'.class_basename($trait))) {
-                $this->{$method}();
+                $this->$method();
             }
         }
     }

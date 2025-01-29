@@ -6,62 +6,102 @@ use Illuminate\Support\Str;
 
 trait ClassDetailsTrait
 {
-    private string $classRootNamespace;
+    /**
+     * class root namespace
+     *
+     * detect based parent class namespace,
+     * assuming parent and child classes has same root namespace
+     */
+    protected string $classRootNamespace;
 
-    private array $classRelativePaths;
+    /**
+     * class suffix
+     *
+     * detect based class root namespace, assuming as singular
+     */
+    protected string $classSuffix;
 
-    private string $classWithoutSuffix;
+    /**
+     * class basename without suffix
+     */
+    protected string $classNameWithoutSuffix;
 
-    private function getClassRelativePaths(): array
+    /**
+     * Class sub folders after root folder
+     *
+     * detect based class root namespace and basename
+     */
+    protected array $classSubFolders;
+
+    /**
+     * detect application(package) root namespace and concat relative namespace
+     */
+    protected function getTargetRootNamespace(string $relativeNamespace): string
     {
-        if (! isset($this->classRelativePaths)) {
-            $this->processClassDetails();
-        }
-
-        return $this->classRelativePaths;
-    }
-
-    private function getClassRootFolder(): string
-    {
-        $path = Str::beforeLast(self::class, '\\');
-
-        return Str::afterLast($path, '\\');
-    }
-
-    private function getRelativeNamespace(string $relativeNamespace): string
-    {
-        $rootNamespace = $this->getRootNamespace().'\\';
+        $rootNamespace = Str::before(static::class, '\\').'\\';
 
         return $relativeNamespace ? $rootNamespace.$relativeNamespace.'\\' : $rootNamespace;
     }
 
-    private function getRootNamespace(): string
+    /**
+     * Get class sub folders after class root folder
+     *
+     * detect based class root namespace and basename
+     */
+    protected function getClassSubFolders(): array
+    {
+        if (! isset($this->classSubFolders)) {
+            $classRootNamespace = $this->getClassRootNamespace();
+            $classRelativePath = Str::between(static::class, $classRootNamespace, '\\');
+            $classRelativePath = Str::after($classRelativePath, '\\');
+            $this->classSubFolders = $classRelativePath ? explode('\\', $classRelativePath) : [];
+        }
+
+        return $this->classSubFolders;
+    }
+
+    /**
+     * get class basename without suffix
+     */
+    protected function getClassNameWithoutSuffix(): string
+    {
+        if (! isset($this->classNameWithoutSuffix)) {
+            $classBasename = Str::afterLast(static::class, '\\');
+            $classSuffix = $this->getClassSuffix();
+            $this->classNameWithoutSuffix = Str::replaceLast($classSuffix, '', $classBasename);
+        }
+
+        return $this->classNameWithoutSuffix;
+    }
+
+    /**
+     * get class suffix
+     *
+     * detect based class root namespace, assuming as singular
+     */
+    protected function getClassSuffix(): string
+    {
+        if (! isset($this->classSuffix)) {
+            $classRootNamespace = $this->getClassRootNamespace();
+            $this->classSuffix = Str::singular($classRootNamespace);
+        }
+
+        return $this->classSuffix;
+    }
+
+    /**
+     * get class root namespace
+     *
+     * detect based parent class namespace,
+     * assuming parent and child classes has same root namespace
+     */
+    protected function getClassRootNamespace(): string
     {
         if (! isset($this->classRootNamespace)) {
-            $this->processClassDetails();
+            $namespace = Str::beforeLast(self::class, '\\');
+            $this->classRootNamespace = Str::afterLast($namespace, '\\');
         }
 
         return $this->classRootNamespace;
-    }
-
-    private function getClassWithoutSuffix(): string
-    {
-        if (! isset($this->classWithoutSuffix)) {
-            $this->processClassDetails();
-        }
-
-        return $this->classWithoutSuffix;
-    }
-
-    private function processClassDetails(): void
-    {
-        $classRootFolder = $this->getClassRootFolder();
-        $classRelativePath = Str::between(static::class, $classRootFolder, Str::singular($classRootFolder));
-        $classRelativePath = Str::after($classRelativePath, '\\');
-        $classRelativePaths = explode('\\', $classRelativePath);
-
-        $this->classWithoutSuffix = array_pop($classRelativePaths);
-        $this->classRelativePaths = $classRelativePaths;
-        $this->classRootNamespace = Str::before(static::class, '\\');
     }
 }
