@@ -7,86 +7,32 @@ use Illuminate\Support\Str;
 trait ClassDetailsTrait
 {
     /**
-     * class root namespace
+     * core_namespace:
+     *       it is application or package namespace
+     * root_namespace:
+     *      detect based parent class namespace,
+     *      assuming parent and child classes has same root namespace
+     * resource_name:
+     *      class resource name,
+     * sub_folders:
+     *      lass sub folders after root folder
+     *      detect based class root namespace and basename
+     */
+    protected array $classDetails = [];
+
+    /**
+     * get class core namespace
      *
-     * detect based parent class namespace,
-     * assuming parent and child classes has same root namespace
+     * detect based current class namespace
+     * it is application or package namespace
      */
-    protected string $classRootNamespace;
-
-    /**
-     * class suffix
-     *
-     * detect based class root namespace, assuming as singular
-     */
-    protected string $classSuffix;
-
-    /**
-     * class basename without suffix
-     */
-    protected string $classNameWithoutSuffix;
-
-    /**
-     * Class sub folders after root folder
-     *
-     * detect based class root namespace and basename
-     */
-    protected array $classSubFolders;
-
-    /**
-     * detect application(package) root namespace and concat relative namespace
-     */
-    protected function getTargetRootNamespace(string $relativeNamespace): string
+    protected function getClassCoreNamespace(): string
     {
-        $rootNamespace = Str::before(static::class, '\\').'\\';
-
-        return $relativeNamespace ? $rootNamespace.$relativeNamespace.'\\' : $rootNamespace;
-    }
-
-    /**
-     * Get class sub folders after class root folder
-     *
-     * detect based class root namespace and basename
-     */
-    protected function getClassSubFolders(): array
-    {
-        if (! isset($this->classSubFolders)) {
-            $classRootNamespace = $this->getClassRootNamespace();
-            $classRelativePath = Str::between(static::class, $classRootNamespace, '\\');
-            $classRelativePath = Str::after($classRelativePath, '\\');
-            $this->classSubFolders = $classRelativePath ? explode('\\', $classRelativePath) : [];
+        if (! array_key_exists('core_namespace', $this->classDetails)) {
+            $this->classDetails['core_namespace'] = Str::before(static::class, '\\').'\\';
         }
 
-        return $this->classSubFolders;
-    }
-
-    /**
-     * get class basename without suffix
-     */
-    protected function getClassNameWithoutSuffix(): string
-    {
-        if (! isset($this->classNameWithoutSuffix)) {
-            $classBasename = Str::afterLast(static::class, '\\');
-            $classSuffix = $this->getClassSuffix();
-            $this->classNameWithoutSuffix = Str::replaceLast($classSuffix, '', $classBasename);
-        }
-
-        return $this->classNameWithoutSuffix;
-    }
-
-    /**
-     * get class suffix
-     *
-     * detect based class root namespace, assuming as singular
-     */
-    protected function getClassSuffix(): string
-    {
-        if (! isset($this->classSuffix)) {
-            $classRootNamespace = $this->getClassRootNamespace();
-            $this->classSuffix = Str::singular($classRootNamespace);
-        }
-
-        return $this->classSuffix;
+        return $this->classDetails['core_namespace'];
     }
 
     /**
@@ -97,11 +43,53 @@ trait ClassDetailsTrait
      */
     protected function getClassRootNamespace(): string
     {
-        if (! isset($this->classRootNamespace)) {
+        if (! array_key_exists('root_namespace', $this->classDetails)) {
             $namespace = Str::beforeLast(self::class, '\\');
-            $this->classRootNamespace = Str::afterLast($namespace, '\\');
+            $this->classDetails['root_namespace'] = Str::afterLast($namespace, '\\');
         }
 
-        return $this->classRootNamespace;
+        return $this->classDetails['root_namespace'];
+    }
+
+    /**
+     * detect application(package) root namespace and concat relative namespace
+     */
+    protected function getTargetRootNamespace(string $relativeNamespace): string
+    {
+        $coreNamespace = $this->getClassCoreNamespace();
+
+        return $coreNamespace ? $coreNamespace.$relativeNamespace.'\\' : $coreNamespace;
+    }
+
+    /**
+     * get class basename without suffix
+     */
+    protected function getClassResourceName(): string
+    {
+        if (! array_key_exists('resource_name', $this->classDetails)) {
+            $classBasename = Str::afterLast(static::class, '\\');
+            $classRootNamespace = $this->getClassRootNamespace();
+            $classSuffix = Str::singular($classRootNamespace);
+            $this->classDetails['resource_name'] = Str::replaceLast($classSuffix, '', $classBasename);
+        }
+
+        return $this->classDetails['resource_name'];
+    }
+
+    /**
+     * Get class sub folders after class root folder
+     *
+     * detect based class root namespace and basename
+     */
+    protected function getClassSubFolders(): array
+    {
+        if (! array_key_exists('sub_folders', $this->classDetails)) {
+            $classRootNamespace = $this->getClassRootNamespace();
+            $classRelativePath = Str::between(static::class, $classRootNamespace, '\\');
+            $classRelativePath = Str::after($classRelativePath, '\\');
+            $this->classDetails['sub_folders'] = $classRelativePath ? explode('\\', $classRelativePath) : [];
+        }
+
+        return $this->classDetails['sub_folders'];
     }
 }

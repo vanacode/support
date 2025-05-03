@@ -25,10 +25,10 @@ trait DynamicClassTrait
     {
         $rootNamespace = $this->getTargetRootNamespace($relativeNamespace);
         $subFolders = $subFolders ?? $this->getClassSubFolders();
-        $classBasename = $this->getClassNameWithoutSuffix().$suffix;
+        $classResourceName = $this->getClassResourceName().$suffix;
 
         while ($subFolders) {
-            $className = $rootNamespace.implode('\\', $subFolders).'\\'.$classBasename;
+            $className = $rootNamespace.implode('\\', $subFolders).'\\'.$classResourceName;
 
             if (class_exists($className)) {
                 return $className;
@@ -36,7 +36,7 @@ trait DynamicClassTrait
             array_pop($subFolders);
         }
 
-        $className = $rootNamespace.$classBasename;
+        $className = $rootNamespace.$classResourceName;
 
         return class_exists($className) ? $className : $default;
     }
